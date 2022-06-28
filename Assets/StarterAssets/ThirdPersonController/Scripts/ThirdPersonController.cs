@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Skills;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 using UnityEngine.InputSystem;
 #endif
@@ -80,6 +81,10 @@ namespace StarterAssets
         private float _cinemachineTargetPitch;
 
         // player
+        private bool _canMove = true;
+        private bool _canRun = true;
+        private bool _canJump;
+        
         private float _speed;
         private float _animationBlend;
         private float _targetRotation = 0.0f;
@@ -215,6 +220,10 @@ namespace StarterAssets
         {
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+
+            //Stop Speed
+            if (!_canRun) targetSpeed = MoveSpeed;
+            if (!_canMove) targetSpeed = 0f;
 
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -388,5 +397,19 @@ namespace StarterAssets
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
         }
+
+        public void SetMove(bool isMove)
+        {
+            _canMove = isMove;
+        }
+        public void SetRun(bool isRun)
+        {
+            _canMove = isRun;
+        }
+        public void SetJump(bool isJump)
+        {
+            _canMove = isJump;
+        }
+        
     }
 }
