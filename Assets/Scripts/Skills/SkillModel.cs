@@ -5,7 +5,7 @@ namespace Skills
     public class SkillModel
     {
         public PlayerSkills.SkillType Type;
-        public int Id;
+        public PlayerSkills.SkillType[] RequiredTypes;
         public string Name;
         public int RequiredCost;
         public bool IsOpened;

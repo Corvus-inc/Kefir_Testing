@@ -30,6 +30,12 @@ namespace Skills
         public void Learning(bool isLearn)
         {
             learn.enabled = isLearn;
+            var imageColor = isLearn ? learn.image.color = Color.green : learn.image.color = Color.gray;
+        }
+        public void Forgetting(bool isForget)
+        {
+            forget.enabled = isForget;
+            var imageColor = isForget ? forget.image.color = Color.yellow : forget.image.color = Color.gray;
         }
     }
 }

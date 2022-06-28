@@ -20,7 +20,7 @@ namespace Skills
             _buttonsView = buttonsView;
             _treeView = treeView;
             _playerSkills = new PlayerSkills();
-            
+
             treeView.SetPlayerSkills(GetPlayerSkills());
 
             foreach (var skillButton in _treeView.SkillButtonList)
@@ -28,34 +28,47 @@ namespace Skills
                 skillButton.IsSelected += type =>
                 {
                     _selectedSkill = _playerSkills._listModels.First(_ => _.Type == type);
-                    OpenLearning(type);
+                    
+                    OpenForgetting(_selectedSkill.Type);
+                    OpenLearning(_selectedSkill.Type);
                 };
             }
-            
-            _playerSkills.ChangeSkill += (type) =>
-            {
-                if (_playerSkills.TryUnlockSkill(type))
-                {
-                    SetSkill(type);
-                }
-            };
 
             _buttonsView.Learn += () =>
             {
-                _playerSkills.TryUnlockSkill(_selectedSkill.Type);
-                OpenLearning(_selectedSkill.Type);
-                Debug.Log("Learn!");
+                if (_playerSkills.TryUnlockSkill(_selectedSkill.Type))
+                {
+                    SetSkill(_selectedSkill.Type);
+                    
+                    OpenForgetting(_selectedSkill.Type);
+                    OpenLearning(_selectedSkill.Type);
+                    
+                    Debug.Log("Learn!");
+                }
             };
+
             _buttonsView.Forget += () =>
             {
-                _playerSkills.LockSkill(_selectedSkill.Type);
+                if (_playerSkills.TryLockSkill(_selectedSkill.Type))
+                {
+                    Debug.Log("Forget!!");
+                }
+                else
+                {
+                    Debug.Log("Dont Forget!!");
+                }
+
+                OpenForgetting(_selectedSkill.Type);
                 OpenLearning(_selectedSkill.Type);
-                Debug.Log("Forget!!");
             };
+            
             _buttonsView.ForgetEverything += () =>
             {
                 Debug.Log("Evrething!");
                 _playerSkills.LockAllSkill();
+                
+                OpenForgetting(_selectedSkill.Type);
+                OpenLearning(_selectedSkill.Type);
             };
             _buttonsView.AddScore += () => { Debug.Log("Add!"); };
         }
@@ -65,9 +78,29 @@ namespace Skills
             return _playerSkills;
         }
 
+        private void OpenForgetting(PlayerSkills.SkillType skillType)
+        {
+            if (_playerSkills.CanSkillLocked(skillType))
+            {
+                _buttonsView.Forgetting(true);
+            }
+            else
+            {
+                _buttonsView.Forgetting(false);
+            }
+        }
+
         private void OpenLearning(PlayerSkills.SkillType skillType)
         {
-            _buttonsView.Learning(!_playerSkills.IsSkillUnlocked(skillType));
+            if (_playerSkills.CanSkillUnlock(skillType))
+            {
+                _buttonsView.Learning(!_playerSkills.IsSkillUnlocked(skillType));
+            }
+            else
+            {
+                _buttonsView.Learning(_playerSkills.IsSkillUnlocked(skillType));
+                
+            }
         }
 
         private void SetSkill(PlayerSkills.SkillType skillType)
@@ -78,10 +111,11 @@ namespace Skills
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Jump:
-                    Debug.Log(skillType.ToString()+ " opened");
+                    Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Move:
-                    ChangeMove();
+                    Debug.Log(skillType.ToString() + " opened");
+                    // ChangeMove();
                     break;
                 case PlayerSkills.SkillType.Run:
                     Debug.Log(skillType.ToString() + " opened");
