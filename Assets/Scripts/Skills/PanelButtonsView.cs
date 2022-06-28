@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
 using UnityEngine.UI;
@@ -11,6 +12,7 @@ namespace Skills
         [SerializeField] private Button forget;
         [SerializeField] private Button addScore;
         [SerializeField] private Button forgetEverything;
+        [SerializeField] private TMP_Text textScore;
 
         public event Action Learn;
         public event Action Forget;
@@ -36,6 +38,11 @@ namespace Skills
         {
             forget.enabled = isForget;
             var imageColor = isForget ? forget.image.color = Color.yellow : forget.image.color = Color.gray;
+        }
+
+        public void UpdateScore(int score)
+        {
+            textScore.text = $"Score: {score}";
         }
     }
 }

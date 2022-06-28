@@ -22,6 +22,8 @@ namespace Skills
             _playerSkills = new PlayerSkills();
 
             treeView.SetPlayerSkills(GetPlayerSkills());
+            
+            _buttonsView.UpdateScore(_playerSkills.Score);
 
             foreach (var skillButton in _treeView.SkillButtonList)
             {
@@ -29,6 +31,7 @@ namespace Skills
                 {
                     _selectedSkill = _playerSkills._listModels.First(_ => _.Type == type);
                     
+                    _buttonsView.UpdateScore(_playerSkills.Score);
                     OpenForgetting(_selectedSkill.Type);
                     OpenLearning(_selectedSkill.Type);
                 };
@@ -40,6 +43,7 @@ namespace Skills
                 {
                     SetSkill(_selectedSkill.Type);
                     
+                    _buttonsView.UpdateScore(_playerSkills.Score);
                     OpenForgetting(_selectedSkill.Type);
                     OpenLearning(_selectedSkill.Type);
                     
@@ -57,7 +61,8 @@ namespace Skills
                 {
                     Debug.Log("Dont Forget!!");
                 }
-
+                
+                _buttonsView.UpdateScore(_playerSkills.Score);
                 OpenForgetting(_selectedSkill.Type);
                 OpenLearning(_selectedSkill.Type);
             };
@@ -67,10 +72,16 @@ namespace Skills
                 Debug.Log("Evrething!");
                 _playerSkills.LockAllSkill();
                 
+                _buttonsView.UpdateScore(_playerSkills.Score);
                 OpenForgetting(_selectedSkill.Type);
                 OpenLearning(_selectedSkill.Type);
             };
-            _buttonsView.AddScore += () => { Debug.Log("Add!"); };
+            _buttonsView.AddScore += () =>
+            {
+                _playerSkills.AddScore();
+                _buttonsView.UpdateScore(_playerSkills.Score);
+                Debug.Log("Add Score+1!");
+            };
         }
 
         public PlayerSkills GetPlayerSkills()
@@ -98,8 +109,7 @@ namespace Skills
             }
             else
             {
-                _buttonsView.Learning(_playerSkills.IsSkillUnlocked(skillType));
-                
+                _buttonsView.Learning(false);
             }
         }
 

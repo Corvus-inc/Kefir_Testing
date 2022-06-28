@@ -20,15 +20,15 @@ namespace Skills
         public List<SkillModel> _listModels = new List<SkillModel>()
         {
             new SkillModel() { Type = SkillType.Move, Name = "Move", RequiredCost = 1 },
-            new SkillModel() { Type = SkillType.None, Name = "None", RequiredCost = 1 },
+            new SkillModel() { Type = SkillType.None, Name = "None", RequiredCost = 2 },
             new SkillModel()
             {
-                Type = SkillType.Run, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Run", RequiredCost = 1
+                Type = SkillType.Run, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Run", RequiredCost = 3
             },
             new SkillModel()
             {
                 Type = SkillType.Jump, RequiredTypes = new SkillType[] { SkillType.Run }, Name = "Jump",
-                RequiredCost = 1
+                RequiredCost = 4
             }
         };
 
@@ -38,7 +38,15 @@ namespace Skills
 
 
         private List<SkillType> _unlockedSkillTypeList;
-        private int _score;
+        
+        //todo move to player class
+        private int _score = 2;
+        public int Score => _score;
+
+        public void AddScore()
+        {
+            _score++;
+        }
 
         public PlayerSkills()
         {
@@ -74,13 +82,25 @@ namespace Skills
 
         public void LockAllSkill()
         {
+            foreach (var skillType in _unlockedSkillTypeList)
+            {
+                var modelSkill = _listModels.First(_ => _.Type == skillType);
+                _score += modelSkill.RequiredCost;
+
+            }
             _unlockedSkillTypeList.Clear();
         }
 
 
         public bool CanSkillUnlock(SkillType skillType)
         {
-            var requiredTypes = _listModels.First(_ => _.Type == skillType).RequiredTypes;
+            var modelSkill = _listModels.First(_ => _.Type == skillType);
+            var requiredTypes = modelSkill.RequiredTypes;
+
+            if (_score < modelSkill.RequiredCost)
+            {
+                return false;
+            }
 
             if (requiredTypes != null)
             {
@@ -128,12 +148,15 @@ namespace Skills
 
         private void LockSkill(SkillType skillType)
         {
+            _score += _listModels.First(_ => _.Type == skillType).RequiredCost;
             _unlockedSkillTypeList.Remove(skillType);
         }
 
         private void UnlockSkill(SkillType skillType)
         {
             if (IsSkillUnlocked(skillType)) return;
+            
+            _score -= _listModels.First(_ => _.Type == skillType).RequiredCost;
             _unlockedSkillTypeList.Add(skillType);
             ChangeSkill?.Invoke(skillType);
         }
