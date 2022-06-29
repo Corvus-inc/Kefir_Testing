@@ -25,8 +25,13 @@ namespace Skills
 
         public List<SkillModel> _listModels = new List<SkillModel>()
         {
-            new SkillModel() { Type = SkillType.Move, Name = "Move", RequiredCost = 1 },
-            new SkillModel() { Type = SkillType.None,RequiredTypes = new SkillType[] { SkillType.Move }, Name = "None", RequiredCost = 2 },
+            new SkillModel()
+            {
+                Type = SkillType.None, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "None",
+                RequiredCost = 20
+            },
+
+            new SkillModel() { Type = SkillType.Move, Name = "Move", RequiredCost = 0 },
             new SkillModel()
             {
                 Type = SkillType.Run, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Run", RequiredCost = 3
@@ -36,6 +41,7 @@ namespace Skills
                 Type = SkillType.Jump, RequiredTypes = new SkillType[] { SkillType.Run }, Name = "Jump",
                 RequiredCost = 4
             },
+
             new SkillModel()
             {
                 Type = SkillType.LieDown, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "LieDown",
@@ -48,15 +54,38 @@ namespace Skills
             },
             new SkillModel()
             {
-                Type = SkillType.Sleep, RequiredTypes = new SkillType[] { SkillType.SitDown, SkillType.LieDown }, Name = "Sleep",
+                Type = SkillType.Sleep, RequiredTypes = new SkillType[] { SkillType.SitDown, SkillType.LieDown },
+                Name = "Sleep",
                 RequiredCost = 4
-            }
+            },
+
+            new SkillModel()
+            {
+                Type = SkillType.Ready, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Ready",
+                RequiredCost = 1
+            },
+            new SkillModel()
+            {
+                Type = SkillType.Salsa, RequiredTypes = new SkillType[] { SkillType.Ready }, Name = "Salsa",
+                RequiredCost = 2
+            },
+            new SkillModel()
+            {
+                Type = SkillType.Wave, RequiredTypes = new SkillType[] { SkillType.Ready }, Name = "Wave",
+                RequiredCost = 2
+            },
+            new SkillModel()
+            {
+                Type = SkillType.HipHop, RequiredTypes = new SkillType[] { SkillType.Salsa, SkillType.Wave },
+                Name = "HipHop",
+                RequiredCost = 4
+            },
         };
 
         #endregion
 
         private List<SkillType> _unlockedSkillTypeList;
-        
+
         //todo move to player class
         public int Score { get; private set; } = 2;
 
@@ -103,8 +132,8 @@ namespace Skills
             {
                 var modelSkill = _listModels.First(_ => _.Type == skillType);
                 Score += modelSkill.RequiredCost;
-
             }
+
             _unlockedSkillTypeList.Clear();
         }
 
@@ -159,7 +188,7 @@ namespace Skills
             {
                 return true;
             }
-            
+
             return false;
         }
 
@@ -172,7 +201,7 @@ namespace Skills
         private void UnlockSkill(SkillType skillType)
         {
             if (IsSkillUnlocked(skillType)) return;
-            
+
             Score -= _listModels.First(_ => _.Type == skillType).RequiredCost;
             _unlockedSkillTypeList.Add(skillType);
         }

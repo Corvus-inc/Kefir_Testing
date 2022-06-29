@@ -139,6 +139,18 @@ namespace Skills
                 case PlayerSkills.SkillType.LieDown:
                     Debug.Log(skillType.ToString() + " opened");
                     break;
+                case PlayerSkills.SkillType.Ready:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
+                case PlayerSkills.SkillType.Salsa:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
+                case PlayerSkills.SkillType.Wave:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
+                case PlayerSkills.SkillType.HipHop:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(skillType), skillType, null);
             }
