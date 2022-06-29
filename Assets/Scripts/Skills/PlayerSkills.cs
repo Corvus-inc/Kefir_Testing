@@ -14,7 +14,11 @@ namespace Skills
             Jump,
             LieDown,
             SitDown,
-            Sleep
+            Sleep,
+            Ready,
+            Salsa,
+            Wave,
+            HipHop
         }
 
         #region PreinstalSkills
