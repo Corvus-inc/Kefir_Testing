@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 
 namespace Skills
 {
@@ -13,6 +12,9 @@ namespace Skills
             Move,
             Run,
             Jump,
+            LieDown,
+            SitDown,
+            Sleep
         }
 
         #region PreinstalSkills
@@ -20,7 +22,7 @@ namespace Skills
         public List<SkillModel> _listModels = new List<SkillModel>()
         {
             new SkillModel() { Type = SkillType.Move, Name = "Move", RequiredCost = 1 },
-            new SkillModel() { Type = SkillType.None, Name = "None", RequiredCost = 2 },
+            new SkillModel() { Type = SkillType.None,RequiredTypes = new SkillType[] { SkillType.Move }, Name = "None", RequiredCost = 2 },
             new SkillModel()
             {
                 Type = SkillType.Run, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Run", RequiredCost = 3
@@ -29,23 +31,34 @@ namespace Skills
             {
                 Type = SkillType.Jump, RequiredTypes = new SkillType[] { SkillType.Run }, Name = "Jump",
                 RequiredCost = 4
+            },
+            new SkillModel()
+            {
+                Type = SkillType.LieDown, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "LieDown",
+                RequiredCost = 2
+            },
+            new SkillModel()
+            {
+                Type = SkillType.SitDown, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Sit",
+                RequiredCost = 2
+            },
+            new SkillModel()
+            {
+                Type = SkillType.Sleep, RequiredTypes = new SkillType[] { SkillType.SitDown, SkillType.LieDown }, Name = "Sleep",
+                RequiredCost = 4
             }
         };
 
         #endregion
 
-        public event Action<SkillType> ChangeSkill;
-
-
         private List<SkillType> _unlockedSkillTypeList;
         
         //todo move to player class
-        private int _score = 2;
-        public int Score => _score;
+        public int Score { get; private set; } = 2;
 
         public void AddScore()
         {
-            _score++;
+            Score++;
         }
 
         public PlayerSkills()
@@ -85,7 +98,7 @@ namespace Skills
             foreach (var skillType in _unlockedSkillTypeList)
             {
                 var modelSkill = _listModels.First(_ => _.Type == skillType);
-                _score += modelSkill.RequiredCost;
+                Score += modelSkill.RequiredCost;
 
             }
             _unlockedSkillTypeList.Clear();
@@ -97,7 +110,7 @@ namespace Skills
             var modelSkill = _listModels.First(_ => _.Type == skillType);
             var requiredTypes = modelSkill.RequiredTypes;
 
-            if (_score < modelSkill.RequiredCost)
+            if (Score < modelSkill.RequiredCost)
             {
                 return false;
             }
@@ -148,7 +161,7 @@ namespace Skills
 
         private void LockSkill(SkillType skillType)
         {
-            _score += _listModels.First(_ => _.Type == skillType).RequiredCost;
+            Score += _listModels.First(_ => _.Type == skillType).RequiredCost;
             _unlockedSkillTypeList.Remove(skillType);
         }
 
@@ -156,9 +169,8 @@ namespace Skills
         {
             if (IsSkillUnlocked(skillType)) return;
             
-            _score -= _listModels.First(_ => _.Type == skillType).RequiredCost;
+            Score -= _listModels.First(_ => _.Type == skillType).RequiredCost;
             _unlockedSkillTypeList.Add(skillType);
-            ChangeSkill?.Invoke(skillType);
         }
     }
 }

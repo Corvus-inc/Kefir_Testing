@@ -130,6 +130,15 @@ namespace Skills
                 case PlayerSkills.SkillType.Run:
                     Debug.Log(skillType.ToString() + " opened");
                     break;
+                case PlayerSkills.SkillType.SitDown:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
+                case PlayerSkills.SkillType.Sleep:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
+                case PlayerSkills.SkillType.LieDown:
+                    Debug.Log(skillType.ToString() + " opened");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(skillType), skillType, null);
             }

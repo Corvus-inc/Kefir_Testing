@@ -16,7 +16,6 @@ namespace Skills
 
             SkillButtonList = new List<SkillButton>();
 
-
             for (int i = 0; i < _playerSkills._listModels.Count; i++)
             {
                 var skill = new SkillButton(transformPositions[i], playerSkills._listModels[i]);

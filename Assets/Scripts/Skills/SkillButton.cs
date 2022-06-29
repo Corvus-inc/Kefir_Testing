@@ -30,7 +30,6 @@ namespace Skills
                 _transform.AddComponent<Button>().onClick.AddListener(TaskOnClick);
             }
 
-
             void TaskOnClick(){
                 Debug.Log (_type);
                 IsSelected?.Invoke(_type);

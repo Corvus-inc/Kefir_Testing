@@ -18,10 +18,4 @@ public class Testing : MonoBehaviour
     {
         skillController = new SkillTreeController(panelButtonsView, skillTreeView);
     }
-
-    private void Start()
-    {
-        // skillTreeView.SetPlayerSkills(skillController.GetPlayerSkills());
-    }
-
 }
