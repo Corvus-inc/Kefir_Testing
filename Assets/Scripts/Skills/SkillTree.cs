@@ -26,7 +26,7 @@ namespace Skills
 
                 SkillButtonList.Add(skill);
             }
-
+//todo 
             foreach (var skill in SkillButtonList)
             {
                 var types = _playerSkills._listModels.Find(_ => _.Type == skill.Type).RequiredTypes;

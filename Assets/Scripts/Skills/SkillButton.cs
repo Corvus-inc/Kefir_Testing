@@ -15,6 +15,7 @@ namespace Skills
         public Transform TransformSkill { get; }
 
         private readonly SelectedSkill _selectedSkill;
+        private Image _imageBtn;
 
         public SkillButton(Transform transformSkill, SkillModel model)
         {
@@ -31,6 +32,8 @@ namespace Skills
             if (btn != null)
             {
                 btn.onClick.AddListener(TaskOnClick);
+                _imageBtn = btn.gameObject.GetComponent<Image>();
+                _imageBtn.color = Color.cyan;
             }
             else
             {
@@ -57,6 +60,18 @@ namespace Skills
             _selectedSkill.SelectedTMP.enabled = false;
         }
 
+        public void SetColourLearn(bool hasLearn)
+        {
+            if (hasLearn)
+            {
+                _imageBtn.color = Color.green;
+            }
+            else
+            {
+                _imageBtn.color = Color.cyan;
+            }
+        }
+        
         public void DrawLine(Transform endLine, Transform rootLine, GameObject preset)
         {
             var line = GameObject.Instantiate(preset, rootLine);

@@ -12,9 +12,7 @@ namespace Skills
         
         private readonly PlayerSkills _playerSkills;
         private readonly PanelButtonsView _buttonsView;
-        
-        private SkillTree _tree;
-        private SkillButton _lastBtn;
+
         private SkillButton _selectedBtn;
         private SkillModel _selectedSkill;
         private ThirdPersonController _personController;
@@ -22,26 +20,26 @@ namespace Skills
         public SkillTreeController(PanelButtonsView buttonsView, SkillTree tree)
         {
             _buttonsView = buttonsView;
-            _tree = tree;
             _playerSkills = new PlayerSkills();
             
-            tree.SetPlayerSkills(GetPlayerSkills());
+            tree.SetPlayerSkills(_playerSkills);
             
+            //Init base skill
             _selectedSkill = _playerSkills.GetModel(BaseSkill);
-            _selectedBtn = _tree.SkillButtonList.First(_ => _.Type == _selectedSkill.Type);
+            _selectedBtn = tree.SkillButtonList.First(_ => _.Type == _selectedSkill.Type);
             _selectedBtn.OnSelected(_selectedSkill.RequiredCost);
-            if (_playerSkills.TryUnlockSkill(_selectedSkill.Type)) SetSkill(_selectedSkill.Type);
-                
+            if (_playerSkills.TryUnlockSkill(_selectedSkill.Type)) AcceptSkill(_selectedSkill.Type);
+            _selectedSkill.IsBase = true;
 
             UpdateButtons();
 
-            foreach (var skillButton in _tree.SkillButtonList)
+            foreach (var skillButton in tree.SkillButtonList)
             {
                 skillButton.IsSelected += type =>
                 {
-                    _lastBtn = _selectedBtn;
+                    var lastBtn = _selectedBtn;
                     _selectedBtn = skillButton;
-                    _lastBtn.OffSelected();
+                    lastBtn.OffSelected();
 
                     _selectedSkill = _playerSkills.GetModel(type);
                     _selectedBtn.OnSelected(_selectedSkill.RequiredCost);
@@ -52,25 +50,17 @@ namespace Skills
 
             _buttonsView.Learn += () =>
             {
-                if (_playerSkills.TryUnlockSkill(_selectedSkill.Type))
-                {
-                    SetSkill(_selectedSkill.Type);
-
-                    UpdateButtons();
-
-                    Debug.Log("Learn!");
-                }
+                if (!_playerSkills.TryUnlockSkill(_selectedSkill.Type)) return;
+                
+                AcceptSkill(_selectedSkill.Type);
+                UpdateButtons();
             };
 
             _buttonsView.Forget += () =>
             {
                 if (_playerSkills.TryLockSkill(_selectedSkill.Type))
                 {
-                    Debug.Log("Forget!!");
-                }
-                else
-                {
-                    Debug.Log("Dont Forget!!");
+                   CancelSkill(_selectedSkill.Type);
                 }
 
                 UpdateButtons();
@@ -78,24 +68,21 @@ namespace Skills
 
             _buttonsView.ForgetEverything += () =>
             {
-                Debug.Log("Evrething!");
                 _playerSkills.LockAllSkill();
 
                 UpdateButtons();
+//todo
+                foreach (var button in tree.SkillButtonList)
+                {
+                    button.SetColourLearn(_playerSkills.GetModel(button.Type).IsOpened);
+                }
             };
             _buttonsView.AddScore += () =>
             {
                 _playerSkills.AddScore();
 
                 UpdateButtons();
-                
-                Debug.Log("Add Score+1!");
             };
-        }
-
-        public PlayerSkills GetPlayerSkills()
-        {
-            return _playerSkills;
         }
 
         private void UpdateButtons()
@@ -103,18 +90,12 @@ namespace Skills
             _buttonsView.UpdateScore(_playerSkills.Score);
             IsLearning(_selectedSkill.Type);
             IsForgetting(_selectedSkill.Type);
+            _selectedBtn.SetColourLearn(_playerSkills.IsSkillUnlocked(_selectedSkill.Type));
         }
 
         private void IsForgetting(PlayerSkills.SkillType skillType)
         {
-            if (_playerSkills.CanSkillLocked(skillType))
-            {
-                _buttonsView.Forgetting(true);
-            }
-            else
-            {
-                _buttonsView.Forgetting(false);
-            }
+            _buttonsView.Forgetting(_playerSkills.CanSkillLocked(skillType));
         }
 
         private void IsLearning(PlayerSkills.SkillType skillType)
@@ -129,7 +110,7 @@ namespace Skills
             }
         }
 
-        private void SetSkill(PlayerSkills.SkillType skillType)
+        private void AcceptSkill(PlayerSkills.SkillType skillType)
         {
             switch (skillType)
             {
@@ -166,6 +147,49 @@ namespace Skills
                     break;
                 case PlayerSkills.SkillType.HipHop:
                     Debug.Log(skillType.ToString() + " opened");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(skillType), skillType, null);
+            }
+        }
+
+        private void CancelSkill(PlayerSkills.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case PlayerSkills.SkillType.None:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.Jump:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.Move:
+                    Debug.Log(skillType.ToString() + " closed");
+                    // ChangeMove();
+                    break;
+                case PlayerSkills.SkillType.Run:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.SitDown:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.Sleep:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.LieDown:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.Ready:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.Salsa:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.Wave:
+                    Debug.Log(skillType.ToString() + " closed");
+                    break;
+                case PlayerSkills.SkillType.HipHop:
+                    Debug.Log(skillType.ToString() + " closed");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(skillType), skillType, null);

@@ -34,49 +34,72 @@ namespace Skills
             new SkillModel() { Type = SkillType.Move, Name = "Move", RequiredCost = 0 },
             new SkillModel()
             {
-                Type = SkillType.Run, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Run", RequiredCost = 3
+                Type = SkillType.Run,
+                RequiredTypes = new SkillType[] { SkillType.Move },
+                LockRequiredTypes = new SkillType[] { SkillType.Jump },
+                Name = "Run",
+                RequiredCost = 3
             },
             new SkillModel()
             {
-                Type = SkillType.Jump, RequiredTypes = new SkillType[] { SkillType.Run }, Name = "Jump",
+                Type = SkillType.Jump,
+                RequiredTypes = new SkillType[] { SkillType.Run }, 
+                Name = "Jump",
                 RequiredCost = 4
             },
 
             new SkillModel()
             {
-                Type = SkillType.LieDown, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "LieDown",
+                Type = SkillType.LieDown, 
+                RequiredTypes = new SkillType[] { SkillType.Move },
+                LockRequiredTypes = new SkillType[] { SkillType.Sleep },
+                Name = "LieDown",
                 RequiredCost = 2
             },
             new SkillModel()
             {
-                Type = SkillType.SitDown, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Sit",
+                Type = SkillType.SitDown,
+                RequiredTypes = new SkillType[] { SkillType.Move },
+                LockRequiredTypes = new SkillType[] { SkillType.Sleep },
+                Name = "Sit",
                 RequiredCost = 2
             },
             new SkillModel()
             {
-                Type = SkillType.Sleep, RequiredTypes = new SkillType[] { SkillType.SitDown, SkillType.LieDown },
+                Type = SkillType.Sleep,
+                RequiredTypes = new SkillType[] { SkillType.SitDown, SkillType.LieDown },
                 Name = "Sleep",
                 RequiredCost = 4
             },
 
             new SkillModel()
             {
-                Type = SkillType.Ready, RequiredTypes = new SkillType[] { SkillType.Move }, Name = "Ready",
+                Type = SkillType.Ready, 
+                RequiredTypes = new SkillType[] { SkillType.Move }, 
+                LockRequiredTypes = new SkillType[] { SkillType.Salsa, SkillType.Wave },
+                Name = "Ready",
                 RequiredCost = 1
             },
             new SkillModel()
             {
-                Type = SkillType.Salsa, RequiredTypes = new SkillType[] { SkillType.Ready }, Name = "Salsa",
+                Type = SkillType.Salsa, 
+                RequiredTypes = new SkillType[] { SkillType.Ready },
+                LockRequiredTypes = new SkillType[] { SkillType.HipHop },
+                Name = "Salsa",
                 RequiredCost = 2
             },
             new SkillModel()
             {
-                Type = SkillType.Wave, RequiredTypes = new SkillType[] { SkillType.Ready }, Name = "Wave",
+                Type = SkillType.Wave,
+                RequiredTypes = new SkillType[] { SkillType.Ready },
+                LockRequiredTypes = new SkillType[] { SkillType.HipHop },
+                Name = "Wave",
                 RequiredCost = 2
             },
             new SkillModel()
             {
-                Type = SkillType.HipHop, RequiredTypes = new SkillType[] { SkillType.Salsa, SkillType.Wave },
+                Type = SkillType.HipHop,
+                RequiredTypes = new SkillType[] { SkillType.Salsa, SkillType.Wave },
                 Name = "HipHop",
                 RequiredCost = 4
             },
@@ -84,9 +107,8 @@ namespace Skills
 
         #endregion
 
-
-        private List<SkillType> _unlockedSkillTypeList;
-        private Dictionary<SkillType, SkillModel> _dictionaryModels;
+        private readonly List<SkillType> _unlockedSkillTypeList;
+        private readonly Dictionary<SkillType, SkillModel> _dictionaryModels;
 
         //todo move to player class
         public int Score { get; private set; } = 2;
@@ -137,13 +159,15 @@ namespace Skills
 
         public void LockAllSkill()
         {
-            foreach (var skillType in _unlockedSkillTypeList)
-            {
-                var modelSkill = GetModel(skillType);
-                Score += modelSkill.RequiredCost;
-            }
+            var list = _unlockedSkillTypeList.ToList();
 
-            _unlockedSkillTypeList.Clear();
+            foreach (var skillType 
+                     in from skillType in list 
+                     let skillModel = GetModel(skillType)
+                     where !skillModel.IsBase select skillType)
+            {
+                LockSkill(skillType);
+            }
         }
 
 
@@ -174,11 +198,26 @@ namespace Skills
 
         public bool CanSkillLocked(SkillType skillType)
         {
-            return !(from model in _dictionaryModels 
-                let requiredTypes = model.Value.RequiredTypes 
-                where requiredTypes != null 
-                where requiredTypes.Where(type => type == skillType).Any(type => IsSkillUnlocked(model.Key)) 
-                select model).Any() && IsSkillUnlocked(skillType);
+            var skillModel = GetModel(skillType);
+            
+            if (skillModel.IsBase) return false;
+
+            if (IsSkillUnlocked(skillType))
+            {
+                var lockTypes = skillModel.LockRequiredTypes;
+                if (lockTypes != null) 
+                {
+                    return lockTypes.All(type => !IsSkillUnlocked(type));
+                }
+                return true;
+            }
+            return false;
+            //
+            // return !(from model in _dictionaryModels 
+            //     let requiredTypes = model.Value.RequiredTypes 
+            //     where requiredTypes != null 
+            //     where requiredTypes.Where(type => type == skillType).Any(type => IsSkillUnlocked(model.Key)) 
+            //     select model).Any() && IsSkillUnlocked(skillType);
         }
 
         private void LockSkill(SkillType skillType)
