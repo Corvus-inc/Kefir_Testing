@@ -9,32 +9,32 @@ namespace Skills
 {
     public class SkillButton
     {
-        public PlayerSkills.SkillType Type;
         public event Action<PlayerSkills.SkillType> IsSelected;
+        
+        public PlayerSkills.SkillType Type { get; }
+        public Transform TransformSkill { get; }
 
+        private readonly SelectedSkill _selectedSkill;
 
-        private Transform _transform;
-        private SelectedSkill _selectedSkill;
-
-        public SkillButton(Transform transform, SkillModel model)
+        public SkillButton(Transform transformSkill, SkillModel model)
         {
-            _transform = transform;
+            TransformSkill = transformSkill;
             Type = model.Type;
             _selectedSkill = new SelectedSkill();
 
-            _transform.Find("Button").GetComponentInChildren<TMP_Text>().text = model.Type.ToString();
-            _selectedSkill.selectedImg = _transform.Find("SelectedImg").GetComponent<Image>();
-            _selectedSkill.selectedTMP = _selectedSkill.selectedImg.GetComponentInChildren<TMP_Text>();
+            TransformSkill.Find("Button").GetComponentInChildren<TMP_Text>().text = model.Type.ToString();
+            _selectedSkill.SelectedImg = TransformSkill.Find("SelectedImg").GetComponent<Image>();
+            _selectedSkill.SelectedTMP = _selectedSkill.SelectedImg.GetComponentInChildren<TMP_Text>();
             OffSelected();
 
-            var btn = _transform.GetComponentInChildren<Button>();
+            var btn = TransformSkill.GetComponentInChildren<Button>();
             if (btn != null)
             {
                 btn.onClick.AddListener(TaskOnClick);
             }
             else
             {
-                _transform.AddComponent<Button>().onClick.AddListener(TaskOnClick);
+                TransformSkill.AddComponent<Button>().onClick.AddListener(TaskOnClick);
             }
 
             void TaskOnClick()
@@ -46,41 +46,35 @@ namespace Skills
 
         public void OnSelected(int score)
         {
-            _selectedSkill.selectedImg.enabled = true;
-            _selectedSkill.selectedTMP.enabled = true;
-            _selectedSkill.selectedTMP.text = score.ToString();
+            _selectedSkill.SelectedImg.enabled = true;
+            _selectedSkill.SelectedTMP.enabled = true;
+            _selectedSkill.SelectedTMP.text = score.ToString();
         }
 
         public void OffSelected()
         {
-            _selectedSkill.selectedImg.enabled = false;
-            _selectedSkill.selectedTMP.enabled = false;
+            _selectedSkill.SelectedImg.enabled = false;
+            _selectedSkill.SelectedTMP.enabled = false;
         }
 
         public void DrawLine(Transform endLine, Transform rootLine, GameObject preset)
         {
-            var go = GameObject.Instantiate(preset, rootLine);
-
-            var rectTransform = go.gameObject.GetComponent<RectTransform>();
+            var line = GameObject.Instantiate(preset, rootLine);
+            var rectTransform = line.gameObject.GetComponent<RectTransform>();
+            var disButtons = Vector3.Distance(TransformSkill.position, endLine.position);
             
-            var disButtons = Vector3.Distance(_transform.position, endLine.position);
-            
+            //set position and rotation for GameObject on direction
             rectTransform.sizeDelta = new Vector2(10, disButtons); 
-            rectTransform.position =  Vector3.Lerp(_transform.position, endLine.position, 0.5f);
-            var angle = Vector3.Angle(endLine.position - _transform.position, Vector3.up);
-            angle = Mathf.Sign(Vector3.Cross(endLine.position - _transform.position, Vector3.up).z) * -angle;
+            rectTransform.position =  Vector3.Lerp(TransformSkill.position, endLine.position, 0.5f);
+            var angle = Vector3.Angle(endLine.position - TransformSkill.position, Vector3.up);
+            angle = Mathf.Sign(Vector3.Cross(endLine.position - TransformSkill.position, Vector3.up).z) * -angle;
             rectTransform.rotation = Quaternion.Euler(0,0,angle);
         }
-
-        public Transform GetTransform()
-        {
-            return _transform;
-        }
-
+        
         private class SelectedSkill
         {
-            public Image selectedImg;
-            public TMP_Text selectedTMP;
+            public Image SelectedImg { get; set; }
+            public TMP_Text SelectedTMP{ get; set; }
         }
     }
 }

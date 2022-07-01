@@ -8,26 +8,34 @@ namespace Skills
 {
     public class SkillTreeController
     {
-        private SkillTreeView _treeView;
-        private PlayerSkills _playerSkills;
-        private PanelButtonsView _buttonsView;
+        private const PlayerSkills.SkillType BaseSkill = PlayerSkills.SkillType.Move;
+        
+        private readonly PlayerSkills _playerSkills;
+        private readonly PanelButtonsView _buttonsView;
+        
+        private SkillTree _tree;
+        private SkillButton _lastBtn;
+        private SkillButton _selectedBtn;
+        private SkillModel _selectedSkill;
         private ThirdPersonController _personController;
 
-        private SkillModel _selectedSkill;
-        private SkillButton _selectedBtn;
-        private SkillButton _lastBtn;
-
-        public SkillTreeController(PanelButtonsView buttonsView, SkillTreeView treeView)
+        public SkillTreeController(PanelButtonsView buttonsView, SkillTree tree)
         {
             _buttonsView = buttonsView;
-            _treeView = treeView;
+            _tree = tree;
             _playerSkills = new PlayerSkills();
+            
+            tree.SetPlayerSkills(GetPlayerSkills());
+            
+            _selectedSkill = _playerSkills.GetModel(BaseSkill);
+            _selectedBtn = _tree.SkillButtonList.First(_ => _.Type == _selectedSkill.Type);
+            _selectedBtn.OnSelected(_selectedSkill.RequiredCost);
+            if (_playerSkills.TryUnlockSkill(_selectedSkill.Type)) SetSkill(_selectedSkill.Type);
+                
 
-            treeView.SetPlayerSkills(GetPlayerSkills());
+            UpdateButtons();
 
-            _buttonsView.UpdateScore(_playerSkills.Score);
-
-            foreach (var skillButton in _treeView.SkillButtonList)
+            foreach (var skillButton in _tree.SkillButtonList)
             {
                 skillButton.IsSelected += type =>
                 {
@@ -35,12 +43,10 @@ namespace Skills
                     _selectedBtn = skillButton;
                     _lastBtn.OffSelected();
 
-                    _selectedSkill = _playerSkills._listModels.First(_ => _.Type == type);
-
+                    _selectedSkill = _playerSkills.GetModel(type);
                     _selectedBtn.OnSelected(_selectedSkill.RequiredCost);
-                    _buttonsView.UpdateScore(_playerSkills.Score);
-                    OpenForgetting(_selectedSkill.Type);
-                    OpenLearning(_selectedSkill.Type);
+
+                    UpdateButtons();
                 };
             }
 
@@ -50,9 +56,7 @@ namespace Skills
                 {
                     SetSkill(_selectedSkill.Type);
 
-                    _buttonsView.UpdateScore(_playerSkills.Score);
-                    OpenForgetting(_selectedSkill.Type);
-                    OpenLearning(_selectedSkill.Type);
+                    UpdateButtons();
 
                     Debug.Log("Learn!");
                 }
@@ -69,9 +73,7 @@ namespace Skills
                     Debug.Log("Dont Forget!!");
                 }
 
-                _buttonsView.UpdateScore(_playerSkills.Score);
-                OpenForgetting(_selectedSkill.Type);
-                OpenLearning(_selectedSkill.Type);
+                UpdateButtons();
             };
 
             _buttonsView.ForgetEverything += () =>
@@ -79,15 +81,14 @@ namespace Skills
                 Debug.Log("Evrething!");
                 _playerSkills.LockAllSkill();
 
-                _buttonsView.UpdateScore(_playerSkills.Score);
-                OpenForgetting(_selectedSkill.Type);
-                OpenLearning(_selectedSkill.Type);
+                UpdateButtons();
             };
             _buttonsView.AddScore += () =>
             {
                 _playerSkills.AddScore();
-                _buttonsView.UpdateScore(_playerSkills.Score);
-                OpenLearning(_selectedSkill.Type);
+
+                UpdateButtons();
+                
                 Debug.Log("Add Score+1!");
             };
         }
@@ -97,7 +98,14 @@ namespace Skills
             return _playerSkills;
         }
 
-        private void OpenForgetting(PlayerSkills.SkillType skillType)
+        private void UpdateButtons()
+        {
+            _buttonsView.UpdateScore(_playerSkills.Score);
+            IsLearning(_selectedSkill.Type);
+            IsForgetting(_selectedSkill.Type);
+        }
+
+        private void IsForgetting(PlayerSkills.SkillType skillType)
         {
             if (_playerSkills.CanSkillLocked(skillType))
             {
@@ -109,7 +117,7 @@ namespace Skills
             }
         }
 
-        private void OpenLearning(PlayerSkills.SkillType skillType)
+        private void IsLearning(PlayerSkills.SkillType skillType)
         {
             if (_playerSkills.CanSkillUnlock(skillType))
             {

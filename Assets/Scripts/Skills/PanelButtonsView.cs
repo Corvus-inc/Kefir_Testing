@@ -21,8 +21,6 @@ namespace Skills
 
         private void Start()
         {
-            learn.enabled = false;
-            
             learn.onClick.AddListener(() => { Learn?.Invoke(); });
             forget.onClick.AddListener(() => { Forget?.Invoke(); });
             addScore.onClick.AddListener(() => { AddScore?.Invoke(); });

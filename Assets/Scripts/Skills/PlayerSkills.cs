@@ -84,7 +84,9 @@ namespace Skills
 
         #endregion
 
+
         private List<SkillType> _unlockedSkillTypeList;
+        private Dictionary<SkillType, SkillModel> _dictionaryModels;
 
         //todo move to player class
         public int Score { get; private set; } = 2;
@@ -97,6 +99,12 @@ namespace Skills
         public PlayerSkills()
         {
             _unlockedSkillTypeList = new List<SkillType>();
+            _dictionaryModels = new Dictionary<SkillType, SkillModel>();
+
+            foreach (var model in _listModels)
+            {
+                _dictionaryModels?.Add(model.Type, model);
+            }
         }
 
         public bool IsSkillUnlocked(SkillType skillType)
@@ -104,33 +112,34 @@ namespace Skills
             return _unlockedSkillTypeList.Contains(skillType);
         }
 
+        public SkillModel GetModel(SkillType skillType)
+        {
+            return _dictionaryModels[skillType];
+        }
+
         public bool TryUnlockSkill(SkillType skillType)
         {
-            if (CanSkillUnlock(skillType))
-            {
-                UnlockSkill(skillType);
-                return true;
-            }
+            if (!CanSkillUnlock(skillType)) return false;
+            
+            UnlockSkill(skillType);
+            return true;
 
-            return false;
         }
 
         public bool TryLockSkill(SkillType skillType)
         {
-            if (CanSkillLocked(skillType))
-            {
-                LockSkill(skillType);
-                return true;
-            }
+            if (!CanSkillLocked(skillType)) return false;
+            
+            LockSkill(skillType);
+            return true;
 
-            return false;
         }
 
         public void LockAllSkill()
         {
             foreach (var skillType in _unlockedSkillTypeList)
             {
-                var modelSkill = _listModels.First(_ => _.Type == skillType);
+                var modelSkill = GetModel(skillType);
                 Score += modelSkill.RequiredCost;
             }
 
@@ -140,7 +149,7 @@ namespace Skills
 
         public bool CanSkillUnlock(SkillType skillType)
         {
-            var modelSkill = _listModels.First(_ => _.Type == skillType);
+            var modelSkill = GetModel(skillType);
             var requiredTypes = modelSkill.RequiredTypes;
 
             if (Score < modelSkill.RequiredCost)
@@ -148,17 +157,15 @@ namespace Skills
                 return false;
             }
 
-            if (requiredTypes != null)
+            if (requiredTypes == null) return true;
+            foreach (var type in requiredTypes)
             {
-                foreach (var type in requiredTypes)
+                if (IsSkillUnlocked(type))
                 {
-                    if (IsSkillUnlocked(type))
-                    {
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                }
+                else
+                {
+                    return false;
                 }
             }
 
@@ -167,34 +174,17 @@ namespace Skills
 
         public bool CanSkillLocked(SkillType skillType)
         {
-            foreach (var model in _listModels)
-            {
-                if (model.RequiredTypes != null)
-                {
-                    foreach (var type in model.RequiredTypes)
-                    {
-                        if (type == skillType)
-                        {
-                            if (IsSkillUnlocked(model.Type))
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (IsSkillUnlocked(skillType))
-            {
-                return true;
-            }
-
-            return false;
+            return !(from model in _dictionaryModels 
+                let requiredTypes = model.Value.RequiredTypes 
+                where requiredTypes != null 
+                where requiredTypes.Where(type => type == skillType).Any(type => IsSkillUnlocked(model.Key)) 
+                select model).Any() && IsSkillUnlocked(skillType);
         }
 
         private void LockSkill(SkillType skillType)
         {
-            Score += _listModels.First(_ => _.Type == skillType).RequiredCost;
+            GetModel(skillType).IsOpened = false;
+            Score += GetModel(skillType).RequiredCost;
             _unlockedSkillTypeList.Remove(skillType);
         }
 
@@ -202,8 +192,10 @@ namespace Skills
         {
             if (IsSkillUnlocked(skillType)) return;
 
-            Score -= _listModels.First(_ => _.Type == skillType).RequiredCost;
+            GetModel(skillType).IsOpened = true;
+            Score -= GetModel(skillType).RequiredCost;
             _unlockedSkillTypeList.Add(skillType);
         }
+        
     }
 }

@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Skills
 {
-    public class SkillTreeView : MonoBehaviour
+    public class SkillTree : MonoBehaviour
     {
         [SerializeField] private Transform[] transformPositions;
         [SerializeField] private Transform rootLines;
-        [SerializeField] private GameObject prefab;
+        [FormerlySerializedAs("prefab")] [SerializeField] private GameObject prefabLine;
         
-        public List<SkillButton> SkillButtonList { get; set; }
+        public List<SkillButton> SkillButtonList { get; private set; }
 
         private PlayerSkills _playerSkills;
 
@@ -33,7 +34,7 @@ namespace Skills
                 {
                     foreach (var type in types)
                     {
-                        skill.DrawLine(SkillButtonList.Find(_=> _.Type == type).GetTransform(), rootLines, prefab);
+                        skill.DrawLine(SkillButtonList.Find(_=> _.Type == type).TransformSkill, rootLines, prefabLine);
                     }
                 }
             }

@@ -648,7 +648,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 317b8458da0b1584f8d6f90ed5efb9f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillTreeView: {fileID: 610259003}
+  skillTree: {fileID: 610259003}
   panelButtonsView: {fileID: 1781122551}
   personController: {fileID: 1323669407}
 --- !u!224 &1173584315 stripped

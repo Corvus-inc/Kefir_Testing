@@ -10,12 +10,12 @@ public class Testing : MonoBehaviour
 {
     private SkillTreeController skillController;
     
-    [SerializeField] private SkillTreeView skillTreeView;
+    [SerializeField] private SkillTree skillTree;
     [SerializeField] private PanelButtonsView panelButtonsView;
     [SerializeField] private ThirdPersonController personController;
 
     private void Awake()
     {
-        skillController = new SkillTreeController(panelButtonsView, skillTreeView);
+        skillController = new SkillTreeController(panelButtonsView, skillTree);
     }
 }
