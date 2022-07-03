@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Skills
 {
-    public class SkillButton
+    public class SkillTreeButton
     {
         public event Action<PlayerSkills.SkillType> IsSelected;
         
@@ -17,7 +17,7 @@ namespace Skills
         private readonly SelectedSkill _selectedSkill;
         private Image _imageBtn;
 
-        public SkillButton(Transform transformSkill, SkillModel model)
+        public SkillTreeButton(Transform transformSkill, SkillModel model)
         {
             TransformSkill = transformSkill;
             Type = model.Type;

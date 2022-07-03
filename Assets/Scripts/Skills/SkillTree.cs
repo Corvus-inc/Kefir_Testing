@@ -10,7 +10,7 @@ namespace Skills
         [SerializeField] private Transform rootLines;
         [FormerlySerializedAs("prefab")] [SerializeField] private GameObject prefabLine;
         
-        public List<SkillButton> SkillButtonList { get; private set; }
+        public List<SkillTreeButton> SkillButtonList { get; private set; }
 
         private PlayerSkills _playerSkills;
 
@@ -18,11 +18,11 @@ namespace Skills
         {
             _playerSkills = playerSkills;
 
-            SkillButtonList = new List<SkillButton>();
+            SkillButtonList = new List<SkillTreeButton>();
 
             for (int i = 0; i < _playerSkills._listModels.Count; i++)
             {
-                var skill = new SkillButton(transformPositions[i], playerSkills._listModels[i]);
+                var skill = new SkillTreeButton(transformPositions[i], playerSkills._listModels[i]);
 
                 SkillButtonList.Add(skill);
             }

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Skills
 {
-    public class PanelButtonsView : MonoBehaviour
+    public class SkillTreePanelButtons : MonoBehaviour
     {
         [SerializeField] private Button learn;
         [SerializeField] private Button forget;

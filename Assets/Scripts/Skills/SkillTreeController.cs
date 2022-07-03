@@ -11,15 +11,24 @@ namespace Skills
         private const PlayerSkills.SkillType BaseSkill = PlayerSkills.SkillType.Move;
         
         private readonly PlayerSkills _playerSkills;
-        private readonly PanelButtonsView _buttonsView;
+        private readonly SkillTreePanelButtons _skillTreePanelButtons;
+        private readonly SkillActivator _activator;
+        private readonly SkillPlayerButtons _skillPlayerButtons;
 
-        private SkillButton _selectedBtn;
+        private SkillTreeButton _selectedBtn;
         private SkillModel _selectedSkill;
         private ThirdPersonController _personController;
 
-        public SkillTreeController(PanelButtonsView buttonsView, SkillTree tree)
+        public SkillTreeController(SkillTreePanelButtons skillTreePanelButtons, 
+            SkillTree tree, 
+            SkillActivator activator, 
+            SkillPlayerButtons skillPlayerButtons,
+            ThirdPersonController personController)
         {
-            _buttonsView = buttonsView;
+            _personController = personController;
+            _skillTreePanelButtons = skillTreePanelButtons;
+            _activator = activator;
+            _skillPlayerButtons = skillPlayerButtons;
             _playerSkills = new PlayerSkills();
             
             tree.SetPlayerSkills(_playerSkills);
@@ -48,7 +57,7 @@ namespace Skills
                 };
             }
 
-            _buttonsView.Learn += () =>
+            _skillTreePanelButtons.Learn += () =>
             {
                 if (!_playerSkills.TryUnlockSkill(_selectedSkill.Type)) return;
                 
@@ -56,7 +65,7 @@ namespace Skills
                 UpdateButtons();
             };
 
-            _buttonsView.Forget += () =>
+            _skillTreePanelButtons.Forget += () =>
             {
                 if (_playerSkills.TryLockSkill(_selectedSkill.Type))
                 {
@@ -66,7 +75,7 @@ namespace Skills
                 UpdateButtons();
             };
 
-            _buttonsView.ForgetEverything += () =>
+            _skillTreePanelButtons.ForgetEverything += () =>
             {
                 _playerSkills.LockAllSkill();
 
@@ -76,8 +85,10 @@ namespace Skills
                 {
                     button.SetColourLearn(_playerSkills.GetModel(button.Type).IsOpened);
                 }
+
+                CancelAllSkills();
             };
-            _buttonsView.AddScore += () =>
+            _skillTreePanelButtons.AddScore += () =>
             {
                 _playerSkills.AddScore();
 
@@ -87,7 +98,7 @@ namespace Skills
 
         private void UpdateButtons()
         {
-            _buttonsView.UpdateScore(_playerSkills.Score);
+            _skillTreePanelButtons.UpdateScore(_playerSkills.Score);
             IsLearning(_selectedSkill.Type);
             IsForgetting(_selectedSkill.Type);
             _selectedBtn.SetColourLearn(_playerSkills.IsSkillUnlocked(_selectedSkill.Type));
@@ -95,18 +106,18 @@ namespace Skills
 
         private void IsForgetting(PlayerSkills.SkillType skillType)
         {
-            _buttonsView.Forgetting(_playerSkills.CanSkillLocked(skillType));
+            _skillTreePanelButtons.Forgetting(_playerSkills.CanSkillLocked(skillType));
         }
 
         private void IsLearning(PlayerSkills.SkillType skillType)
         {
             if (_playerSkills.CanSkillUnlock(skillType))
             {
-                _buttonsView.Learning(!_playerSkills.IsSkillUnlocked(skillType));
+                _skillTreePanelButtons.Learning(!_playerSkills.IsSkillUnlocked(skillType));
             }
             else
             {
-                _buttonsView.Learning(false);
+                _skillTreePanelButtons.Learning(false);
             }
         }
 
@@ -118,6 +129,7 @@ namespace Skills
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Jump:
+                    _personController.CanJump = true;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Move:
@@ -125,27 +137,49 @@ namespace Skills
                     // ChangeMove();
                     break;
                 case PlayerSkills.SkillType.Run:
+                    _personController.CanRun = true;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.SitDown:
+                    _activator.CanSitting = true;
+                    _skillPlayerButtons.GetPlayerButtons()[1].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[1].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Sleep:
+                    _activator.CanSleeping = true;
+                    _skillPlayerButtons.GetPlayerButtons()[2].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[2].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.LieDown:
+                    _activator.CanLying = true;
+                    _skillPlayerButtons.GetPlayerButtons()[0].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[0].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Ready:
+                    _activator.CanReady = true;
+                    _skillPlayerButtons.GetPlayerButtons()[3].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[3].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Salsa:
+                    _activator.CanSalsa = true;
+                    _skillPlayerButtons.GetPlayerButtons()[5].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[5].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.Wave:
+                    _activator.CanWave = true;
+                    _skillPlayerButtons.GetPlayerButtons()[4].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[4].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 case PlayerSkills.SkillType.HipHop:
+                    _activator.CanHipHop = true;
+                    _skillPlayerButtons.GetPlayerButtons()[6].enabled = true;
+                    _skillPlayerButtons.GetPlayerButtons()[6].image.color = Color.yellow;
                     Debug.Log(skillType.ToString() + " opened");
                     break;
                 default:
@@ -161,6 +195,7 @@ namespace Skills
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.Jump:
+                    _personController.CanJump = false;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.Move:
@@ -168,27 +203,49 @@ namespace Skills
                     // ChangeMove();
                     break;
                 case PlayerSkills.SkillType.Run:
+                    _personController.CanRun = false;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.SitDown:
+                    _activator.Sitting = false;
+                    _skillPlayerButtons.GetPlayerButtons()[1].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[1].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.Sleep:
+                    _activator.CanSleeping = false;
+                    _skillPlayerButtons.GetPlayerButtons()[2].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[2].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.LieDown:
+                    _activator.CanLying = false;
+                    _skillPlayerButtons.GetPlayerButtons()[0].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[0].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.Ready:
+                    _activator.CanReady = false;
+                    _skillPlayerButtons.GetPlayerButtons()[3].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[3].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.Salsa:
+                    _activator.CanSalsa = false;
+                    _skillPlayerButtons.GetPlayerButtons()[5].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[5].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.Wave:
+                    _activator.CanWave = false;
+                    _skillPlayerButtons.GetPlayerButtons()[4].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[4].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 case PlayerSkills.SkillType.HipHop:
+                    _activator.CanHipHop = false;
+                    _skillPlayerButtons.GetPlayerButtons()[6].enabled = false;
+                    _skillPlayerButtons.GetPlayerButtons()[6].image.color = Color.gray;
                     Debug.Log(skillType.ToString() + " closed");
                     break;
                 default:
@@ -196,9 +253,12 @@ namespace Skills
             }
         }
 
-        private void ChangeMove()
+        private void CancelAllSkills()
         {
-            _personController.SetMove(_playerSkills.IsSkillUnlocked(PlayerSkills.SkillType.Move));
+            foreach (var model in _playerSkills._listModels)
+            {
+                CancelSkill(model.Type);
+            }
         }
     }
 }
